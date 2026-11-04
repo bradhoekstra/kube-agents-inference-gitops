@@ -165,10 +165,9 @@ spec:
     scaleDown:
       stabilizationWindowSeconds: 300
   metrics:
-  - type: Pods
-    pods:
-      metric:
-        name: prometheus.googleapis.com|vllm:gpu_cache_usage_perc|gauge
+  - type: Resource
+    resource:
+      name: cpu
       target:
-        type: AverageValue
-        averageValue: "800m"
+        type: Utilization
+        averageUtilization: 75

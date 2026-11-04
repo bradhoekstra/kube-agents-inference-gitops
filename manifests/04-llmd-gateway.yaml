@@ -60,6 +60,7 @@ spec:
         - --pool-namespace=llm-inference
         - --grpc-port=9002
         - --grpc-health-port=9003
+        - --metrics-endpoint-auth=false
         - --v=2
         ports:
         - containerPort: 9002

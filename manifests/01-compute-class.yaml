@@ -50,3 +50,31 @@ spec:
     storage:
       bootDiskType: pd-balanced
       bootDiskSize: 200
+  # Priority 4: On-Demand NVIDIA A100 40GB (x2 = 80GB) on A2 fallback (Matches active 16x A100 quota in kube-agents-inference)
+  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
+  - machineFamily: a2
+    gpu:
+      type: nvidia-tesla-a100
+      count: 2
+    minCores: 24
+    minMemoryGb: 170
+    spot: false
+    location:
+      locationPolicy: BALANCED
+    storage:
+      bootDiskType: pd-balanced
+      bootDiskSize: 200
+  # Priority 5: On-Demand NVIDIA L4 24GB (x4 = 96GB) on G2 fallback (Matches active 16x L4 quota in kube-agents-inference)
+  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
+  - machineFamily: g2
+    gpu:
+      type: nvidia-l4
+      count: 4
+    minCores: 48
+    minMemoryGb: 192
+    spot: false
+    location:
+      locationPolicy: BALANCED
+    storage:
+      bootDiskType: pd-balanced
+      bootDiskSize: 200
