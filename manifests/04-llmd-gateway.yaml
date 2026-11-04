@@ -174,6 +174,43 @@ spec:
       headers:
       - name: X-Gateway-Model-Name
         type: Exact
+        value: zai-org/GLM-5.3
+    - path:
+        type: PathPrefix
+        value: /
+      headers:
+      - name: x-model
+        type: Exact
+        value: zai-org/GLM-5.3
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: glm-5-3-pool
+      port: 8000
+      weight: 100
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /glm5
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: glm-5-3-pool
+      port: 8000
+      weight: 100
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+      headers:
+      - name: X-Gateway-Model-Name
+        type: Exact
         value: Qwen/Qwen3.8-27B
     - path:
         type: PathPrefix

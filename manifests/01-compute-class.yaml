@@ -7,51 +7,7 @@ spec:
     enabled: true
   whenUnsatisfiable: DoNotScaleUp
   priorities:
-  # Priority 1: On-Demand NVIDIA RTX PRO 6000 (96GB) on G4 (GIQ benchmarked for google/gemma-4-31B-it)
-  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
-  - machineFamily: g4
-    gpu:
-      type: nvidia-rtx-pro-6000
-      count: 1
-    minCores: 48
-    minMemoryGb: 180
-    spot: false
-    location:
-      locationPolicy: BALANCED
-    storage:
-      bootDiskType: pd-balanced
-      bootDiskSize: 200
-  # Priority 2: DWS FlexStart NVIDIA RTX PRO 6000 (96GB) on G4
-  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
-  - machineFamily: g4
-    gpu:
-      type: nvidia-rtx-pro-6000
-      count: 1
-    minCores: 48
-    minMemoryGb: 180
-    flexStart:
-      enabled: true
-    location:
-      locationPolicy: BALANCED
-    storage:
-      bootDiskType: pd-balanced
-      bootDiskSize: 200
-  # Priority 3: On-Demand NVIDIA H100 80GB on A3 fallback
-  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
-  - machineFamily: a3
-    gpu:
-      type: nvidia-h100-80gb
-      count: 1
-    minCores: 26
-    minMemoryGb: 200
-    spot: false
-    location:
-      locationPolicy: BALANCED
-    storage:
-      bootDiskType: pd-balanced
-      bootDiskSize: 200
-  # Priority 4: On-Demand NVIDIA A100 40GB (x2 = 80GB) on A2 fallback (Matches active 16x A100 quota in kube-agents-inference)
-  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
+  # Priority 1: On-Demand NVIDIA A100 40GB (x2 = 80GB) on A2 (Matches active 16x On-Demand A100 quota)
   - machineFamily: a2
     gpu:
       type: nvidia-tesla-a100
@@ -64,8 +20,15 @@ spec:
     storage:
       bootDiskType: pd-balanced
       bootDiskSize: 200
-  # Priority 5: On-Demand NVIDIA L4 24GB (x4 = 96GB) on G2 fallback (Matches active 16x L4 quota in kube-agents-inference)
-  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
+  # Priority 2: Spot NVIDIA RTX PRO 6000 (96GB) on G4
+  - machineFamily: g4
+    gpu:
+      type: nvidia-rtx-pro-6000
+      count: 2
+    minCores: 96
+    minMemoryGb: 360
+    spot: true
+  # Priority 3: On-Demand NVIDIA L4 24GB (x4 = 96GB) on G2 fallback
   - machineFamily: g2
     gpu:
       type: nvidia-l4
@@ -78,3 +41,52 @@ spec:
     storage:
       bootDiskType: pd-balanced
       bootDiskSize: 200
+---
+apiVersion: cloud.google.com/v1
+kind: ComputeClass
+metadata:
+  name: glm5-big-gpu-class
+spec:
+  nodePoolAutoCreation:
+    enabled: true
+  whenUnsatisfiable: DoNotScaleUp
+  priorities:
+  # Priority 1: Spot 8x NVIDIA H200 141GB (1,128 GB VRAM, 2,952 GB RAM) on A3 Ultra
+  - machineType: a3-ultragpu-8g
+    gpu:
+      type: nvidia-h200-141gb
+      count: 8
+    spot: true
+  # Priority 2: Spot 8x NVIDIA B200 180GB (1,440 GB VRAM, 3,968 GB RAM) on A4
+  - machineType: a4-highgpu-8g
+    gpu:
+      type: nvidia-b200
+      count: 8
+    spot: true
+  # Priority 3: DWS Flex-Start 8x NVIDIA H200 141GB on A3 Ultra
+  - machineType: a3-ultragpu-8g
+    gpu:
+      type: nvidia-h200-141gb
+      count: 8
+    flexStart:
+      enabled: true
+  # Priority 4: DWS Flex-Start 8x NVIDIA B200 180GB on A4
+  - machineType: a4-highgpu-8g
+    gpu:
+      type: nvidia-b200
+      count: 8
+    flexStart:
+      enabled: true
+  # Priority 5: Spot 8x NVIDIA RTX PRO 6000 96GB (768 GB VRAM, 1,440 GB RAM) on G4
+  - machineType: g4-standard-384
+    gpu:
+      type: nvidia-rtx-pro-6000
+      count: 8
+    spot: true
+  # Priority 6: DWS Flex-Start 8x NVIDIA RTX PRO 6000 96GB on G4
+  - machineType: g4-standard-384
+    gpu:
+      type: nvidia-rtx-pro-6000
+      count: 8
+    flexStart:
+      enabled: true

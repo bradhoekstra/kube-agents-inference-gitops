@@ -45,8 +45,8 @@ metadata:
   namespace: llm-inference
 spec:
   hard:
-    requests.cpu: "128"
-    requests.memory: 512Gi
-    limits.cpu: "128"
-    limits.memory: 512Gi
-    requests.nvidia.com/gpu: "8"
+    requests.cpu: "512"
+    requests.memory: 4096Gi
+    limits.cpu: "512"
+    limits.memory: 4096Gi
+    requests.nvidia.com/gpu: "32"
