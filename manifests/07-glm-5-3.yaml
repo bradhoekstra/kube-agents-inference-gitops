@@ -61,9 +61,11 @@ spec:
             --kv-cache-dtype=fp8_e4m3 \
             --tensor-parallel-size=8 \
             --port=8000 \
-            --max-model-len=8192 \
-            --max-num-seqs=16 \
-            --max-num-batched-tokens=8192 \
+            --max-model-len=4096 \
+            --max-num-seqs=4 \
+            --max-num-batched-tokens=2048 \
+            --kv-cache-memory-bytes=1200M \
+            --enforce-eager \
             --gpu-memory-utilization=0.95 \
             --tool-call-parser=glm47 \
             --reasoning-parser=glm47 \

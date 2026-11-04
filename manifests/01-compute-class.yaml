@@ -56,18 +56,24 @@ spec:
     gpu:
       type: nvidia-h200-141gb
       count: 8
+    storage:
+      localSSDCount: 32
     spot: true
   # Priority 2: Spot 8x NVIDIA B200 180GB (1,440 GB VRAM, 3,968 GB RAM) on A4
   - machineType: a4-highgpu-8g
     gpu:
       type: nvidia-b200
       count: 8
+    storage:
+      localSSDCount: 32
     spot: true
   # Priority 3: DWS Flex-Start 8x NVIDIA H200 141GB on A3 Ultra
   - machineType: a3-ultragpu-8g
     gpu:
       type: nvidia-h200-141gb
       count: 8
+    storage:
+      localSSDCount: 32
     flexStart:
       enabled: true
   # Priority 4: DWS Flex-Start 8x NVIDIA B200 180GB on A4
@@ -75,6 +81,8 @@ spec:
     gpu:
       type: nvidia-b200
       count: 8
+    storage:
+      localSSDCount: 32
     flexStart:
       enabled: true
   # Priority 5: Spot 8x NVIDIA RTX PRO 6000 96GB (768 GB VRAM, 1,440 GB RAM) on G4
