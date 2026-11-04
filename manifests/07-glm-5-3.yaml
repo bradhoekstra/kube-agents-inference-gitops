@@ -13,6 +13,8 @@ metadata:
     llm-d.ai/model: zai-org-GLM-5.3
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: glm-5-3-vllm
@@ -52,7 +54,7 @@ spec:
         - |
           export HF_TOKEN=$(cat /mnt/secrets/hf_api_token)
           exec vllm serve zai-org/GLM-5.3 \
-            --tokenizer-mode=glm5_next \
+            --tokenizer-mode=auto \
             --kv-cache-dtype=fp8_e4m3 \
             --tensor-parallel-size=8 \
             --port=8000 \
@@ -66,7 +68,7 @@ spec:
             --served-model-name=zai-org/GLM-5.3
         env:
         - name: VLLM_USE_RUST_FRONTEND
-          value: "1"
+          value: "0"
         - name: HF_TOKEN_PATH
           value: /mnt/secrets/hf_api_token
         ports:
