@@ -57,7 +57,7 @@ spec:
         - name: MODEL_ID
           value: google/gemma-4-31B-it
         - name: TENSOR_PARALLEL_SIZE
-          value: "1"
+          value: "2"
         - name: HF_TOKEN_PATH
           value: /mnt/secrets/hf_api_token
         ports:
@@ -67,11 +67,11 @@ spec:
           requests:
             cpu: "12"
             memory: "64Gi"
-            nvidia.com/gpu: "1"
+            nvidia.com/gpu: "2"
           limits:
             cpu: "12"
             memory: "64Gi"
-            nvidia.com/gpu: "1"
+            nvidia.com/gpu: "2"
         startupProbe:
           httpGet:
             path: /health

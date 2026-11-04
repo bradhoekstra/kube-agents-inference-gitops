@@ -60,6 +60,7 @@ spec:
         - --pool-namespace=llm-inference
         - --grpc-port=9002
         - --grpc-health-port=9003
+        - --health-checking=true
         - --metrics-endpoint-auth=false
         - --v=2
         - --config-text
@@ -176,3 +177,20 @@ spec:
       name: gemma4-31b-pool
       port: 8000
       weight: 100
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: gemma4-pool-healthcheck
+  namespace: llm-inference
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        portSpecification: USE_SERVING_PORT
+        requestPath: /health
+  targetRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: gemma4-31b-pool
