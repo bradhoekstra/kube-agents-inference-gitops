@@ -21,5 +21,9 @@ spec:
   - interval: 15s
     port: metrics
   selector:
-    matchLabels:
-      app: gemma4-epp
+    matchExpressions:
+    - key: app
+      operator: In
+      values:
+      - gemma4-epp
+      - qwen3-8-27b-epp

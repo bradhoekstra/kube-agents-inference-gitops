@@ -8,3 +8,4 @@ resources:
 - 03-vllm-deployment.yaml
 - 04-llmd-gateway.yaml
 - 05-observability.yaml
+- 06-qwen3-8-27b.yaml

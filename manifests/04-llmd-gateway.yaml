@@ -171,6 +171,59 @@ spec:
     - path:
         type: PathPrefix
         value: /
+      headers:
+      - name: X-Gateway-Model-Name
+        type: Exact
+        value: Qwen/Qwen3.8-27B
+    - path:
+        type: PathPrefix
+        value: /
+      headers:
+      - name: x-model
+        type: Exact
+        value: Qwen/Qwen3.8-27B
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: qwen3-8-27b-pool
+      port: 8000
+      weight: 100
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /qwen3
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: qwen3-8-27b-pool
+      port: 8000
+      weight: 100
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /gemma4
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: gemma4-31b-pool
+      port: 8000
+      weight: 100
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
