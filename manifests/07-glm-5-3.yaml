@@ -45,26 +45,28 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: inference-server
-        image: vllm/vllm-openai:gemma4
+        image: vllm/vllm-openai:v0.33.0
         command:
-        - python3
-        - -m
-        - vllm.entrypoints.openai.api_server
-        args:
-        - --model=$(MODEL_ID)
-        - --tensor-parallel-size=$(TENSOR_PARALLEL_SIZE)
-        - --port=8000
-        - --max-model-len=8192
-        - --max-num-seqs=32
-        - --max-num-batched-tokens=8192
-        - --gpu-memory-utilization=0.92
-        - --enable-prefix-caching
-        - --trust-remote-code
+        - /bin/sh
+        - -c
+        - |
+          export HF_TOKEN=$(cat /mnt/secrets/hf_api_token)
+          exec vllm serve zai-org/GLM-5.3 \
+            --tokenizer-mode=glm5_next \
+            --kv-cache-dtype=fp8_e4m3 \
+            --tensor-parallel-size=8 \
+            --port=8000 \
+            --max-model-len=8192 \
+            --max-num-seqs=16 \
+            --max-num-batched-tokens=8192 \
+            --gpu-memory-utilization=0.95 \
+            --tool-call-parser=glm47 \
+            --reasoning-parser=glm47 \
+            --enable-auto-tool-choice \
+            --served-model-name=zai-org/GLM-5.3
         env:
-        - name: MODEL_ID
-          value: zai-org/GLM-5.3
-        - name: TENSOR_PARALLEL_SIZE
-          value: "8"
+        - name: VLLM_USE_RUST_FRONTEND
+          value: "1"
         - name: HF_TOKEN_PATH
           value: /mnt/secrets/hf_api_token
         ports:
