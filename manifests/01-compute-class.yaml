@@ -1,0 +1,52 @@
+apiVersion: cloud.google.com/v1
+kind: ComputeClass
+metadata:
+  name: gemma4-gpu-class
+spec:
+  nodePoolAutoCreation:
+    enabled: true
+  whenUnsatisfiable: DoNotScaleUp
+  priorities:
+  # Priority 1: On-Demand NVIDIA RTX PRO 6000 (96GB) on G4 (GIQ benchmarked for google/gemma-4-31B-it)
+  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
+  - machineFamily: g4
+    gpu:
+      type: nvidia-rtx-pro-6000
+      count: 1
+    minCores: 48
+    minMemoryGb: 180
+    spot: false
+    location:
+      locationPolicy: BALANCED
+    storage:
+      bootDiskType: pd-balanced
+      bootDiskSize: 200
+  # Priority 2: DWS FlexStart NVIDIA RTX PRO 6000 (96GB) on G4
+  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
+  - machineFamily: g4
+    gpu:
+      type: nvidia-rtx-pro-6000
+      count: 1
+    minCores: 48
+    minMemoryGb: 180
+    flexStart:
+      enabled: true
+    location:
+      locationPolicy: BALANCED
+    storage:
+      bootDiskType: pd-balanced
+      bootDiskSize: 200
+  # Priority 3: On-Demand NVIDIA H100 80GB on A3 fallback
+  # IMPORTANT: Align machineFamily with your existing CUDs/Reservations
+  - machineFamily: a3
+    gpu:
+      type: nvidia-h100-80gb
+      count: 1
+    minCores: 26
+    minMemoryGb: 200
+    spot: false
+    location:
+      locationPolicy: BALANCED
+    storage:
+      bootDiskType: pd-balanced
+      bootDiskSize: 200
