@@ -58,11 +58,8 @@ spec:
           value: google/gemma-4-31B-it
         - name: TENSOR_PARALLEL_SIZE
           value: "1"
-        - name: HUGGING_FACE_HUB_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: hf-secret
-              key: hf_api_token
+        - name: HF_TOKEN_PATH
+          value: /mnt/secrets/hf_api_token
         ports:
         - containerPort: 8000
           name: metrics
@@ -116,7 +113,7 @@ spec:
           sizeLimit: 16Gi
       - name: secrets-store-inline
         csi:
-          driver: secrets-store.csi.k8s.io
+          driver: secrets-store-gke.csi.k8s.io
           readOnly: true
           volumeAttributes:
             secretProviderClass: hf-token-spc
