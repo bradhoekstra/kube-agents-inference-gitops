@@ -1,0 +1,296 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gemma4-e4b-it-vllm
+  namespace: llm-inference
+  annotations:
+    config.kubernetes.io/depends-on: cloud.google.com/namespaces//ComputeClass/gemma4-e4b-gpu-class
+  labels:
+    app: gemma4-e4b-it-vllm
+    ai.gke.io/inference-server: vllm
+    ai.gke.io/model: gemma4-e4b-it
+    llm-d.ai/inferenceServing: "true"
+    llm-d.ai/model: google-gemma-4-E4B-it
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gemma4-e4b-it-vllm
+  template:
+    metadata:
+      labels:
+        app: gemma4-e4b-it-vllm
+        ai.gke.io/inference-server: vllm
+        ai.gke.io/model: gemma4-e4b-it
+        llm-d.ai/inferenceServing: "true"
+        llm-d.ai/model: google-gemma-4-E4B-it
+    spec:
+      serviceAccountName: vllm-sa
+      nodeSelector:
+        cloud.google.com/compute-class: gemma4-e4b-gpu-class
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: gemma4-e4b-it-vllm
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: inference-server
+        image: vllm/vllm-openai:gemma4
+        command:
+        - python3
+        - -m
+        - vllm.entrypoints.openai.api_server
+        args:
+        - --model=$(MODEL_ID)
+        - --tensor-parallel-size=$(TENSOR_PARALLEL_SIZE)
+        - --port=8000
+        - --max-model-len=8192
+        - --max-num-seqs=32
+        - --max-num-batched-tokens=8192
+        - --gpu-memory-utilization=0.90
+        - --enable-prefix-caching
+        env:
+        - name: MODEL_ID
+          value: google/gemma-4-E4B-it
+        - name: TENSOR_PARALLEL_SIZE
+          value: "1"
+        - name: HF_TOKEN_PATH
+          value: /mnt/secrets/hf_api_token
+        ports:
+        - containerPort: 8000
+          name: metrics
+        resources:
+          requests:
+            cpu: "8"
+            memory: "32Gi"
+            nvidia.com/gpu: "1"
+          limits:
+            cpu: "8"
+            memory: "32Gi"
+            nvidia.com/gpu: "1"
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 90
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 10"]
+        volumeMounts:
+        - name: dshm
+          mountPath: /dev/shm
+        - name: secrets-store-inline
+          mountPath: /mnt/secrets
+          readOnly: true
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+      - name: secrets-store-inline
+        csi:
+          driver: secrets-store-gke.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: hf-token-spc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gemma4-e4b-it-vllm-service
+  namespace: llm-inference
+  labels:
+    app: gemma4-e4b-it-vllm
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: gemma4-e4b-it-vllm
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gemma4-e4b-it-vllm-pdb
+  namespace: llm-inference
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: gemma4-e4b-it-vllm
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gemma4-e4b-it-vllm-hpa
+  namespace: llm-inference
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gemma4-e4b-it-vllm
+  minReplicas: 1
+  maxReplicas: 4
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gemma4-e4b-epp
+  namespace: llm-inference
+  labels:
+    app: gemma4-e4b-epp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gemma4-e4b-epp
+  template:
+    metadata:
+      labels:
+        app: gemma4-e4b-epp
+    spec:
+      serviceAccountName: llm-d-epp-sa
+      containers:
+      - name: epp
+        image: registry.k8s.io/gateway-api-inference-extension/epp:v1.1.0
+        args:
+        - --pool-name=gemma4-e4b-pool
+        - --pool-namespace=llm-inference
+        - --grpc-port=9002
+        - --grpc-health-port=9003
+        - --health-checking=true
+        - --metrics-endpoint-auth=false
+        - --v=2
+        - --config-text
+        - |
+          apiVersion: inference.networking.x-k8s.io/v1alpha1
+          kind: EndpointPickerConfig
+          plugins:
+          - type: queue-scorer
+          - type: kv-cache-utilization-scorer
+          - type: prefix-cache-scorer
+          schedulingProfiles:
+          - name: default
+            plugins:
+            - pluginRef: queue-scorer
+              weight: 2
+            - pluginRef: kv-cache-utilization-scorer
+              weight: 2
+            - pluginRef: prefix-cache-scorer
+              weight: 3
+        ports:
+        - containerPort: 9002
+          name: grpc
+        - containerPort: 9003
+          name: grpc-health
+        - containerPort: 9090
+          name: metrics
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+        readinessProbe:
+          grpc:
+            port: 9003
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+        livenessProbe:
+          grpc:
+            port: 9003
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gemma4-e4b-epp-svc
+  namespace: llm-inference
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9002
+    targetPort: 9002
+    protocol: TCP
+    name: grpc
+  selector:
+    app: gemma4-e4b-epp
+---
+apiVersion: inference.networking.k8s.io/v1
+kind: InferencePool
+metadata:
+  name: gemma4-e4b-pool
+  namespace: llm-inference
+spec:
+  targetPorts:
+  - number: 8000
+  selector:
+    matchLabels:
+      app: gemma4-e4b-it-vllm
+  endpointPickerRef:
+    group: ""
+    kind: Service
+    name: gemma4-e4b-epp-svc
+    port:
+      number: 9002
+    failureMode: FailOpen
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: gemma4-e4b-pool-healthcheck
+  namespace: llm-inference
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        portSpecification: USE_SERVING_PORT
+        requestPath: /health
+  targetRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: gemma4-e4b-pool

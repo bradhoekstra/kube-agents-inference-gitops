@@ -28,3 +28,4 @@ spec:
       - gemma4-epp
       - qwen3-8-27b-epp
       - glm-5-3-epp
+      - gemma4-e4b-epp

@@ -10,3 +10,4 @@ resources:
 - 05-observability.yaml
 - 06-qwen3-8-27b.yaml
 - 07-glm-5-3.yaml
+- 08-gemma4-e4b.yaml

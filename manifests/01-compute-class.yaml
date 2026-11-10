@@ -45,6 +45,55 @@ spec:
 apiVersion: cloud.google.com/v1
 kind: ComputeClass
 metadata:
+  name: gemma4-e4b-gpu-class
+spec:
+  nodePoolAutoCreation:
+    enabled: true
+  whenUnsatisfiable: DoNotScaleUp
+  priorities:
+  # Priority 1: On-Demand NVIDIA L4 24GB (x1 = 24GB) on G2 (g2-standard-12)
+  - machineFamily: g2
+    gpu:
+      type: nvidia-l4
+      count: 1
+    minCores: 12
+    minMemoryGb: 48
+    spot: false
+    location:
+      locationPolicy: BALANCED
+    storage:
+      bootDiskType: pd-balanced
+      bootDiskSize: 100
+  # Priority 2: Spot NVIDIA L4 24GB (x1 = 24GB) on G2 fallback
+  - machineFamily: g2
+    gpu:
+      type: nvidia-l4
+      count: 1
+    minCores: 12
+    minMemoryGb: 48
+    spot: true
+    location:
+      locationPolicy: BALANCED
+    storage:
+      bootDiskType: pd-balanced
+      bootDiskSize: 100
+  # Priority 3: On-Demand NVIDIA A100 40GB (x1 = 40GB) on A2 fallback
+  - machineFamily: a2
+    gpu:
+      type: nvidia-tesla-a100
+      count: 1
+    minCores: 12
+    minMemoryGb: 85
+    spot: false
+    location:
+      locationPolicy: BALANCED
+    storage:
+      bootDiskType: pd-balanced
+      bootDiskSize: 100
+---
+apiVersion: cloud.google.com/v1
+kind: ComputeClass
+metadata:
   name: glm5-big-gpu-class
 spec:
   nodePoolAutoCreation:

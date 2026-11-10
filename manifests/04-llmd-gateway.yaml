@@ -244,6 +244,43 @@ spec:
   - matches:
     - path:
         type: PathPrefix
+        value: /
+      headers:
+      - name: X-Gateway-Model-Name
+        type: Exact
+        value: google/gemma-4-E4B-it
+    - path:
+        type: PathPrefix
+        value: /
+      headers:
+      - name: x-model
+        type: Exact
+        value: google/gemma-4-E4B-it
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: gemma4-e4b-pool
+      port: 8000
+      weight: 100
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /gemma4-e4b
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /
+    backendRefs:
+    - group: inference.networking.k8s.io
+      kind: InferencePool
+      name: gemma4-e4b-pool
+      port: 8000
+      weight: 100
+  - matches:
+    - path:
+        type: PathPrefix
         value: /gemma4
     filters:
     - type: URLRewrite
