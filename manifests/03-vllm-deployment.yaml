@@ -89,7 +89,10 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
-          failureThreshold: 90
+          # A cold start downloads the weights (about 5 minutes), loads them and
+          # warms up the 131072-token engine; 15 minutes killed it mid-load and
+          # every restart began the download again.
+          failureThreshold: 240
         readinessProbe:
           httpGet:
             path: /health
@@ -113,10 +116,17 @@ spec:
         volumeMounts:
         - name: dshm
           mountPath: /dev/shm
+        - name: hf-cache
+          mountPath: /root/.cache/huggingface
         - name: secrets-store-inline
           mountPath: /mnt/secrets
           readOnly: true
       volumes:
+      # Keeps the downloaded weights across a container restart inside the pod,
+      # so a restart does not download 62 GB again.
+      - name: hf-cache
+        emptyDir:
+          sizeLimit: 120Gi
       - name: dshm
         emptyDir:
           medium: Memory
