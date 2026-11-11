@@ -360,3 +360,58 @@ spec:
     group: inference.networking.k8s.io
     kind: InferencePool
     name: gemma4-31b-pool
+---
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: gemma4-31b-pool-timeout
+  namespace: llm-inference
+spec:
+  # The pools' backend services kept the 30-second default after the route's
+  # timeouts landed: an InferencePool backend takes its timeout from this policy,
+  # as it takes its health check. 1800 s covers the longest agent turn.
+  default:
+    timeoutSec: 1800
+  targetRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: gemma4-31b-pool
+---
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: gemma4-e4b-pool-timeout
+  namespace: llm-inference
+spec:
+  default:
+    timeoutSec: 1800
+  targetRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: gemma4-e4b-pool
+---
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: qwen3-8-27b-pool-timeout
+  namespace: llm-inference
+spec:
+  default:
+    timeoutSec: 1800
+  targetRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: qwen3-8-27b-pool
+---
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: glm-5-3-pool-timeout
+  namespace: llm-inference
+spec:
+  default:
+    timeoutSec: 1800
+  targetRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: glm-5-3-pool
