@@ -195,6 +195,11 @@ spec:
       - name: x-model
         type: Exact
         value: zai-org/GLM-5.3
+    # vLLM answers in minutes at this model's decode rate; the class default of
+    # 30 s cut every long answer (HTTP 504 at 30.0 s on a direct probe).
+    timeouts:
+      request: 1800s
+      backendRequest: 1800s
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
@@ -211,6 +216,9 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
+    timeouts:
+      request: 1800s
+      backendRequest: 1800s
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
@@ -232,6 +240,9 @@ spec:
       - name: x-model
         type: Exact
         value: Qwen/Qwen3.8-27B
+    timeouts:
+      request: 1800s
+      backendRequest: 1800s
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
@@ -248,6 +259,9 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
+    timeouts:
+      request: 1800s
+      backendRequest: 1800s
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
@@ -269,6 +283,9 @@ spec:
       - name: x-model
         type: Exact
         value: google/gemma-4-E4B-it
+    timeouts:
+      request: 1800s
+      backendRequest: 1800s
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
@@ -285,6 +302,9 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
+    timeouts:
+      request: 1800s
+      backendRequest: 1800s
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
@@ -301,6 +321,9 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
+    timeouts:
+      request: 1800s
+      backendRequest: 1800s
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
@@ -311,6 +334,9 @@ spec:
     - path:
         type: PathPrefix
         value: /
+    timeouts:
+      request: 1800s
+      backendRequest: 1800s
     backendRefs:
     - group: inference.networking.k8s.io
       kind: InferencePool
