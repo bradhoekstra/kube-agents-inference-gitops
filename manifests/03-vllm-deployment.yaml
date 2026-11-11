@@ -63,6 +63,9 @@ spec:
         - --reasoning-parser=gemma4
         - --chat-template=/vllm-workspace/examples/tool_chat_template_gemma4.jinja
         - '--limit-mm-per-prompt={"image":0,"audio":0}'
+        # Gemma 4 thinks only when the chat template is asked to; the server's
+        # default turns it on for every request that does not say otherwise.
+        - '--default-chat-template-kwargs={"enable_thinking": true}'
         env:
         - name: MODEL_ID
           # Google's quantization-aware 4-bit release of the same model: about
