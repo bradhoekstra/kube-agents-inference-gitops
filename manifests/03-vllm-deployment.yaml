@@ -65,7 +65,11 @@ spec:
         - '--limit-mm-per-prompt={"image":0,"audio":0}'
         env:
         - name: MODEL_ID
-          value: google/gemma-4-31B-it
+          # Google's quantization-aware 4-bit release of the same model: about
+          # 16 GB of weights instead of 62 GB, which is what lets two A100 40 GB
+          # cards hold the 131072-token KV cache (bf16 left 4.7 GiB, enough for
+          # a 30848-token window).
+          value: google/gemma-4-31B-it-qat-w4a16-ct
         - name: TENSOR_PARALLEL_SIZE
           value: "2"
         - name: HF_TOKEN_PATH
