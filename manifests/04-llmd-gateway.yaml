@@ -216,8 +216,6 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
-    # vLLM answers in minutes at this model's decode rate; the class default of
-    # 30 s cut every long answer (HTTP 504 at 30.0 s on a direct probe).
     timeouts:
       request: 1800s
       backendRequest: 1800s
@@ -242,8 +240,6 @@ spec:
       - name: x-model
         type: Exact
         value: Qwen/Qwen3.8-27B
-    # vLLM answers in minutes at this model's decode rate; the class default of
-    # 30 s cut every long answer (HTTP 504 at 30.0 s on a direct probe).
     timeouts:
       request: 1800s
       backendRequest: 1800s
@@ -263,8 +259,6 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
-    # vLLM answers in minutes at this model's decode rate; the class default of
-    # 30 s cut every long answer (HTTP 504 at 30.0 s on a direct probe).
     timeouts:
       request: 1800s
       backendRequest: 1800s
@@ -289,8 +283,6 @@ spec:
       - name: x-model
         type: Exact
         value: google/gemma-4-E4B-it
-    # vLLM answers in minutes at this model's decode rate; the class default of
-    # 30 s cut every long answer (HTTP 504 at 30.0 s on a direct probe).
     timeouts:
       request: 1800s
       backendRequest: 1800s
@@ -310,8 +302,6 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
-    # vLLM answers in minutes at this model's decode rate; the class default of
-    # 30 s cut every long answer (HTTP 504 at 30.0 s on a direct probe).
     timeouts:
       request: 1800s
       backendRequest: 1800s
@@ -331,8 +321,6 @@ spec:
         path:
           type: ReplacePrefixMatch
           replacePrefixMatch: /
-    # vLLM answers in minutes at this model's decode rate; the class default of
-    # 30 s cut every long answer (HTTP 504 at 30.0 s on a direct probe).
     timeouts:
       request: 1800s
       backendRequest: 1800s
@@ -346,8 +334,6 @@ spec:
     - path:
         type: PathPrefix
         value: /
-    # vLLM answers in minutes at this model's decode rate; the class default of
-    # 30 s cut every long answer (HTTP 504 at 30.0 s on a direct probe).
     timeouts:
       request: 1800s
       backendRequest: 1800s
