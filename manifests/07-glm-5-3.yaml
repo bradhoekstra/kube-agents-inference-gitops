@@ -56,15 +56,20 @@ spec:
         - -c
         - |
           export HF_TOKEN=$(cat /mnt/secrets/hf_api_token)
-          exec vllm serve zai-org/GLM-5.3 \
+          # NVIDIA's NVFP4 build of GLM-5.3: 432 GiB of weights instead of 702, so about
+          # 40 GiB per 96 GB GPU is left for context (the fp8 build left 4.3 GiB and a
+          # 4k window). The served name stays zai-org/GLM-5.3 because the route and
+          # the pool address the model by it. The KV budget holds far more than the
+          # window, so no accepted prompt can wait forever for cache it cannot get.
+          exec vllm serve nvidia/GLM-5.3-NVFP4 \
             --tokenizer-mode=auto \
             --kv-cache-dtype=fp8_e4m3 \
             --tensor-parallel-size=8 \
             --port=8000 \
-            --max-model-len=4096 \
-            --max-num-seqs=4 \
-            --max-num-batched-tokens=2048 \
-            --kv-cache-memory-bytes=1200M \
+            --max-model-len=131072 \
+            --max-num-seqs=8 \
+            --max-num-batched-tokens=8192 \
+            --kv-cache-memory-bytes=24G \
             --enforce-eager \
             --gpu-memory-utilization=0.95 \
             --tool-call-parser=glm47 \
