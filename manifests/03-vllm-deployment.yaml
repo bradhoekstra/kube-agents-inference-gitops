@@ -11,6 +11,12 @@ metadata:
     llm-d.ai/model: google-gemma-4-31B-it
 spec:
   replicas: 1
+  # One replica on a scarce 2x A100 node: a rolling update needs a second such
+  # node before it can replace the pod, and when the region has no A100 capacity
+  # the new pod stays Pending for hours. Recreate frees the node first; the cost
+  # is the model's load time of downtime on each rollout.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: gemma4-31b-it-vllm
