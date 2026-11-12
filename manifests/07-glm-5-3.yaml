@@ -61,6 +61,9 @@ spec:
           # 4k window). The served name stays zai-org/GLM-5.3 because the route and
           # the pool address the model by it. The KV budget holds far more than the
           # window, so no accepted prompt can wait forever for cache it cannot get.
+          # GLM reasons by default; at this node's 10 tokens/s decode a single agent
+          # turn then runs for many minutes of visible deliberation. The server default
+          # turns it off; a caller that wants it sets chat_template_kwargs itself.
           exec vllm serve nvidia/GLM-5.3-NVFP4 \
             --tokenizer-mode=auto \
             --kv-cache-dtype=fp8_e4m3 \
@@ -75,7 +78,8 @@ spec:
             --tool-call-parser=glm47 \
             --reasoning-parser=glm47 \
             --enable-auto-tool-choice \
-            --served-model-name=zai-org/GLM-5.3
+            --served-model-name=zai-org/GLM-5.3 \
+            --default-chat-template-kwargs='{"enable_thinking": false}'
         env:
         - name: VLLM_USE_RUST_FRONTEND
           value: "0"
