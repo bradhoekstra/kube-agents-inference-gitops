@@ -56,15 +56,19 @@ spec:
         - -c
         - |
           export HF_TOKEN=$(cat /mnt/secrets/hf_api_token)
+          # The kube-agents agent's turns reach about 83k tokens in a scheduled audit.
+          # After the weights load the server reports about 94 GiB free per GPU; the
+          # explicit KV budget below holds well over a million tokens of fp8 MLA cache,
+          # and the window stays far inside it so no accepted prompt can wait forever.
           exec vllm serve zai-org/GLM-5.3 \
             --tokenizer-mode=auto \
             --kv-cache-dtype=fp8_e4m3 \
             --tensor-parallel-size=8 \
             --port=8000 \
-            --max-model-len=4096 \
-            --max-num-seqs=4 \
-            --max-num-batched-tokens=2048 \
-            --kv-cache-memory-bytes=1200M \
+            --max-model-len=131072 \
+            --max-num-seqs=8 \
+            --max-num-batched-tokens=8192 \
+            --kv-cache-memory-bytes=48G \
             --enforce-eager \
             --gpu-memory-utilization=0.95 \
             --tool-call-parser=glm47 \
