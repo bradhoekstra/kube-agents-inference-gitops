@@ -70,7 +70,6 @@ spec:
             --max-num-seqs=8 \
             --max-num-batched-tokens=8192 \
             --kv-cache-memory-bytes=24G \
-            --enforce-eager \
             --gpu-memory-utilization=0.95 \
             --tool-call-parser=glm47 \
             --reasoning-parser=glm47 \
