@@ -11,12 +11,17 @@ metadata:
     llm-d.ai/model: google-gemma-4-31B-it
 spec:
   replicas: 1
-  # One replica on a scarce 2x A100 node: a rolling update needs a second such
-  # node before it can replace the pod, and when the region has no A100 capacity
-  # the new pod stays Pending for hours. Recreate frees the node first; the cost
-  # is the model's load time of downtime on each rollout.
+  # One replica on a scarce 2x A100 node: a surge pod needs a second such node,
+  # and when the region has no A100 capacity it stays Pending for hours. With no
+  # surge and one allowed unavailable, the old pod goes first and the new one
+  # takes its node; the cost is the model's load time of downtime per rollout.
+  # (Recreate is refused by the API here: the live object keeps a defaulted
+  # rollingUpdate block that server-side apply does not clear.)
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: gemma4-31b-it-vllm
