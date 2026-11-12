@@ -52,7 +52,12 @@ spec:
         # reach about 83k (kube-agents examples/vllm-gemma), so the window sits well
         # above 32k; the tool-call parser and template let vLLM return structured
         # tool_calls, which every kube-agents turn needs.
-        - --max-model-len=131072
+        # The window must not exceed what the KV cache can hold for one request: a
+        # prompt past that point is accepted and never scheduled, and the caller
+        # sees nothing until it disconnects. On 2x A100 40GB the bf16 cache holds
+        # 52,960 tokens; fp8 storage doubles it, and the window stays below that.
+        - --kv-cache-dtype=fp8_e5m2
+        - --max-model-len=98304
         - --max-num-seqs=32
         - --max-num-batched-tokens=8192
         - --gpu-memory-utilization=0.92
